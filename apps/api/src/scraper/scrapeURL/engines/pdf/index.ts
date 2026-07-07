@@ -35,6 +35,7 @@ import {
 } from "../../../../lib/native-logging";
 import { withSpan, setSpanAttributes } from "../../../../lib/otel-tracer";
 import { scrapePDFWithRunPodMU } from "./runpodMU";
+import { scrapePDFWithPdfService } from "./pdfService";
 import { reconcilePageCountWithFirePdf, scrapePDFWithFirePDF } from "./firePDF";
 import { scrapePDFWithFirePDFAsync } from "./fire-pdf/async";
 import { scrapePDFWithParsePDF } from "./pdfParse";
@@ -379,6 +380,47 @@ export async function scrapePDF(meta: Meta): Promise<EngineScrapeResult> {
       const fileSizeBytes = pdfBuffer.length;
       const base64Content = pdfBuffer.toString("base64");
 
+      // External PDF service (structure-aware opendataloader-pdf wrapper) —
+      // first external tier when configured. Failure falls through to the
+      // Fire PDF / MinerU / pdfParse tiers below. Skipped when Fire PDF is
+      // forced or traffic was explicitly routed to MinerU.
+      if (
+        !forceFirePDF &&
+        !routeToMinerU &&
+        config.PDF_SERVICE_URL
+      ) {
+        try {
+          result = await scrapePDFWithPdfService(
+            {
+              ...meta,
+              logger: meta.logger.child({
+                method: "scrapePDF/pdfService",
+              }),
+            },
+            tempFilePath,
+            pdfBuffer,
+          );
+        } catch (error) {
+          if (
+            error instanceof RemoveFeatureError ||
+            error instanceof AbortManagerThrownError
+          ) {
+            throw error;
+          }
+          meta.logger.warn(
+            "PDF service failed -- falling back to next PDF tier",
+            {
+              method: "scrapePDF/pdfService",
+              error,
+              event: "pdf_engine_fallback",
+              scrape_id: meta.id,
+              team_id: meta.internalOptions.teamId,
+              from_engine: "pdf-service",
+            },
+          );
+        }
+      }
+
       if (
         !forceFirePDF &&
         !routeToMinerU &&
@@ -609,6 +651,9 @@ export async function scrapePDF(meta: Meta): Promise<EngineScrapeResult> {
       statusCode: response.status,
       html: result?.html ?? "",
       markdown: result?.markdown ?? "",
+      ...(result?.structuredJson !== undefined
+        ? { json: result.structuredJson }
+        : {}),
       pdfMetadata: {
         numPages: effectivePageCount,
         totalPages: totalPageCount,

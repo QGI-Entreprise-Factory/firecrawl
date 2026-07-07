@@ -32,6 +32,7 @@ import { getTeamBalance } from "../services/autumn/usage";
 import { canUseDataLayerForRequest } from "../lib/data-layer";
 import { getScrapeZDR } from "../lib/zdr-helpers";
 
+import { SUPPORT_EMAIL } from "../lib/branding";
 export function checkCreditsMiddleware(
   _minimum?: number,
   featureId: string = CREDITS_FEATURE_ID,
@@ -386,7 +387,7 @@ export function countryCheck(
       success: false,
       error: isSelfHosted()
         ? "Use of headers, actions, and the FIRE-1 agent is not allowed by default in your country. Please check your server configuration."
-        : "Use of headers, actions, and the FIRE-1 agent is not allowed by default in your country. Please contact us at help@firecrawl.com",
+        : `Use of headers, actions, and the FIRE-1 agent is not allowed by default in your country. Please contact us at ${SUPPORT_EMAIL}`,
     });
   }
 

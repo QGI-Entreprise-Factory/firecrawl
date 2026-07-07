@@ -58,6 +58,14 @@ x-common-env: &common-env
   # Set NUQ_BACKEND=fdb to run the queue on FoundationDB instead of Postgres
   NUQ_BACKEND: ${NUQ_BACKEND}
   FDB_CLUSTER_FILE: ${NUQ_BACKEND:+/var/fdb/fdb.cluster}
+  # AI-ready converter services (start them with: docker compose --profile converters up)
+  # Sensible defaults when the `converters` profile is running:
+  #   PDF_SERVICE_URL=http://pdf-service:5011
+  #   OMNI_CONVERT_SERVICE_URL=http://omni-convert-service:5012
+  PDF_SERVICE_URL: ${PDF_SERVICE_URL}
+  PDF_SERVICE_API_KEY: ${PDF_SERVICE_API_KEY}
+  OMNI_CONVERT_SERVICE_URL: ${OMNI_CONVERT_SERVICE_URL}
+  OMNI_CONVERT_SERVICE_API_KEY: ${OMNI_CONVERT_SERVICE_API_KEY}
 
 services:
   playwright-service:
@@ -205,6 +213,41 @@ services:
     networks:
       - backend
     restart: "no"
+
+  # AI-ready converter services (opt-in). Start with:
+  #   docker compose --profile converters up
+  # and set PDF_SERVICE_URL / OMNI_CONVERT_SERVICE_URL (see x-common-env).
+  pdf-service:
+    image: ghcr.io/qgi-entreprise-factory/qrawlex-pdf-service:latest
+    profiles:
+      - converters
+    environment:
+      PORT: 5011
+    networks:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+
+  omni-convert-service:
+    image: ghcr.io/qgi-entreprise-factory/qrawlex-omni-convert:latest
+    profiles:
+      - converters
+    environment:
+      PORT: 5012
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
+    networks:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
 
 networks:
   backend:

@@ -3,6 +3,7 @@ import { getJob } from "./crawl-status";
 import { logger as _logger } from "../../lib/logger";
 import { getScrapeZDR } from "../../lib/zdr-helpers";
 
+import { SUPPORT_EMAIL } from "../../lib/branding";
 export async function scrapeStatusController(req: any, res: any) {
   const uuidReg =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -26,7 +27,7 @@ export async function scrapeStatusController(req: any, res: any) {
     return res.status(400).json({
       success: false,
       error:
-        "Your team has zero data retention enabled. This is not supported on scrape status. Please contact support@firecrawl.com to unblock this feature.",
+        `Your team has zero data retention enabled. This is not supported on scrape status. Please contact ${SUPPORT_EMAIL} to unblock this feature.`,
     });
   }
 

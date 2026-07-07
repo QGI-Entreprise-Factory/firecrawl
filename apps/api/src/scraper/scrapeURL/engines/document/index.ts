@@ -1,10 +1,17 @@
 import { Meta } from "../..";
 import { EngineScrapeResult } from "..";
+import { config } from "../../../../config";
 import { fetchFileToBuffer } from "../utils/downloadFile";
 import { DocumentConverter, DocumentType } from "@mendable/firecrawl-rs";
 import type { Response } from "undici";
-import { DocumentAntibotError, DocumentPrefetchFailed } from "../../error";
+import { DocumentAntibotError } from "../../error";
 import { readFile, unlink } from "node:fs/promises";
+import { safeMarkdownToHtml } from "../pdf/markdownToHtml";
+import {
+  convertBufferWithOmniService,
+  hasOmniSupportedExtension,
+  isOmniSupportedContentType,
+} from "./omniConvert";
 
 const converter = new DocumentConverter();
 
@@ -111,6 +118,8 @@ export async function scrapeDocument(meta: Meta): Promise<EngineScrapeResult> {
   let proxyUsed: "basic" | "stealth" = "basic";
   let tempFilePath: string | null = null;
 
+  const omniConfigured = !!config.OMNI_CONVERT_SERVICE_URL;
+
   try {
     if (meta.documentPrefetch !== undefined && meta.documentPrefetch !== null) {
       // Use prefetched document
@@ -145,28 +154,76 @@ export async function scrapeDocument(meta: Meta): Promise<EngineScrapeResult> {
 
       // Validate content type only when fetching directly (not using prefetch)
       const ct = response.headers.get("Content-Type");
-      if (ct && !isValidDocumentContentType(ct)) {
+      if (
+        ct &&
+        !isValidDocumentContentType(ct) &&
+        !(omniConfigured && isOmniSupportedContentType(ct))
+      ) {
         // if downloaded file wasn't a valid document, throw antibot error
         throw new DocumentAntibotError();
       }
     }
 
-    const documentType =
-      getDocumentTypeFromContentType(response.headers.get("content-type")) ??
-      getDocumentTypeFromUrl(response.url);
+    const contentTypeHeader = response.headers.get("content-type");
+    const rustTypeFromContentType =
+      getDocumentTypeFromContentType(contentTypeHeader);
 
-    const html = await converter.convertBufferToHtml(
-      new Uint8Array(buffer),
-      documentType,
-    );
+    // Types the Rust DocumentConverter doesn't understand go straight to the
+    // omni-convert service (when configured). Rust-supported types keep using
+    // Rust, falling back to the omni service if Rust conversion throws.
+    const omniOnly =
+      omniConfigured &&
+      rustTypeFromContentType === null &&
+      ((contentTypeHeader !== null &&
+        isOmniSupportedContentType(contentTypeHeader)) ||
+        hasOmniSupportedExtension(response.url));
+
+    if (!omniOnly) {
+      const documentType =
+        rustTypeFromContentType ?? getDocumentTypeFromUrl(response.url);
+
+      try {
+        const html = await converter.convertBufferToHtml(
+          new Uint8Array(buffer),
+          documentType,
+        );
+
+        return {
+          url: response.url,
+          statusCode: response.status,
+          html,
+          contentType:
+            contentTypeHeader ?? getContentTypeFromDocumentType(documentType),
+          proxyUsed,
+        };
+      } catch (error) {
+        if (!omniConfigured) {
+          throw error;
+        }
+        meta.logger.warn(
+          "Rust document conversion failed -- falling back to omni-convert service",
+          { error },
+        );
+      }
+    }
+
+    // Omni-convert path: the service returns markdown (not HTML), which the
+    // engine result supports directly; html is derived for html/rawHtml formats.
+    const omniResult = await convertBufferWithOmniService(meta, buffer, {
+      contentType: contentTypeHeader ?? undefined,
+      sourceUrl: response.url ?? meta.rewrittenUrl ?? meta.url,
+    });
 
     return {
       url: response.url,
       statusCode: response.status,
-      html,
-      contentType:
-        response.headers.get("content-type") ??
-        getContentTypeFromDocumentType(documentType),
+      html: await safeMarkdownToHtml(
+        omniResult.markdown,
+        meta.logger,
+        meta.id,
+      ),
+      markdown: omniResult.markdown,
+      contentType: contentTypeHeader ?? undefined,
       proxyUsed,
     };
   } finally {
@@ -186,5 +243,7 @@ export async function scrapeDocument(meta: Meta): Promise<EngineScrapeResult> {
 }
 
 export function documentMaxReasonableTime(meta: Meta): number {
-  return 15000;
+  // Omni-convert covers heavier conversions (audio transcription, archives),
+  // which need more headroom than the local Rust converter.
+  return config.OMNI_CONVERT_SERVICE_URL ? 60000 : 15000;
 }

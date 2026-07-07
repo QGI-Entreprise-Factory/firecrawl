@@ -4,6 +4,7 @@ import {
   getIgnoreRobots,
   getCustomRobotsAgent,
 } from "./zdr-helpers";
+import { SUPPORT_EMAIL } from "./branding";
 
 type LocationOptions = { country?: string };
 
@@ -18,8 +19,6 @@ interface APIRequest {
     robotsUserAgent?: string;
   };
 }
-
-const SUPPORT_EMAIL = "support@firecrawl.com";
 
 export function checkPermissions(
   request: APIRequest,

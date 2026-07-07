@@ -32,6 +32,7 @@ import { MapTimeoutError } from "../../lib/error";
 import { checkPermissions } from "../../lib/permissions";
 import { getScrapeZDR } from "../../lib/zdr-helpers";
 
+import { SUPPORT_EMAIL } from "../../lib/branding";
 configDotenv();
 const redis = new Redis(config.REDIS_URL!);
 
@@ -375,7 +376,7 @@ export async function mapController(
     return res.status(400).json({
       success: false,
       error:
-        "Your team has zero data retention enabled. This is not supported on map. Please contact support@firecrawl.com to unblock this feature.",
+        `Your team has zero data retention enabled. This is not supported on map. Please contact ${SUPPORT_EMAIL} to unblock this feature.`,
     });
   }
 

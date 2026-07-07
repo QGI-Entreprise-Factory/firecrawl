@@ -8,6 +8,7 @@ import { z } from "zod";
 import { logRequest } from "../../services/logging/log_job";
 import { getScrapeZDR } from "../../lib/zdr-helpers";
 
+import { SUPPORT_EMAIL } from "../../lib/branding";
 const deepResearchRequestSchema = z
   .object({
     query: z.string().describe("The query or topic to search for").optional(),
@@ -86,7 +87,7 @@ export async function deepResearchController(
     return res.status(400).json({
       success: false,
       error:
-        "Your team has zero data retention enabled. This is not supported on deep research. Please contact support@firecrawl.com to unblock this feature.",
+        `Your team has zero data retention enabled. This is not supported on deep research. Please contact ${SUPPORT_EMAIL} to unblock this feature.`,
     });
   }
 

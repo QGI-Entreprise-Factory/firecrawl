@@ -23,6 +23,7 @@ import { logRequest } from "../../services/logging/log_job";
 import { getScrapeZDR } from "../../lib/zdr-helpers";
 
 import { config } from "../../config";
+import { SUPPORT_EMAIL } from "../../lib/branding";
 async function oldExtract(
   req: RequestWithAuth<{}, ExtractResponse, ExtractRequest>,
   res: Response<ExtractResponse>,
@@ -110,7 +111,7 @@ export async function extractController(
     return res.status(400).json({
       success: false,
       error:
-        "Your team has zero data retention enabled. This is not supported on extract. Please contact support@firecrawl.com to unblock this feature.",
+        `Your team has zero data retention enabled. This is not supported on extract. Please contact ${SUPPORT_EMAIL} to unblock this feature.`,
     });
   }
 
