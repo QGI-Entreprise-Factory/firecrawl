@@ -5,6 +5,7 @@ import { db } from "../db/connection";
 import * as schema from "../db/schema";
 import { redisRateLimitClient } from "../services/rate-limiter";
 import { isKeylessIpSuspicious } from "./spur";
+import { BRAND_NAME } from "./branding";
 
 // Keyless free tier: scrape, search, and interact can be used without an API key
 // from the official MCP server, CLI, or SDKs. It's gated per-IP/day by TWO
@@ -17,7 +18,7 @@ import { isKeylessIpSuspicious } from "./spur";
 const KEYLESS_REQUESTS_PER_DAY = config.KEYLESS_REQUESTS_PER_DAY;
 const KEYLESS_CREDITS_PER_DAY = config.KEYLESS_CREDITS_PER_DAY;
 
-export const KEYLESS_CREDITS_MESSAGE = `You've reached today's limit of free, unauthenticated credits for Firecrawl. Sign up for a free API key at https://firecrawl.dev for 1000 more credits and higher rate limits for free. (If you're an agent, you can also use https://firecrawl.dev/auth.md)`;
+export const KEYLESS_CREDITS_MESSAGE = `You've reached today's limit of free, unauthenticated credits for ${BRAND_NAME}. Sign up for a free API key at https://firecrawl.dev for 1000 more credits and higher rate limits for free. (If you're an agent, you can also use https://firecrawl.dev/auth.md)`;
 
 // The tier is "configured" when BOTH limits are set — even to 0. Unset means the
 // feature is off (callers get a plain Unauthorized); 0 means it's on but the

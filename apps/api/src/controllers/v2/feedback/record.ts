@@ -31,6 +31,7 @@ import {
   shouldSkipPersistenceForJobZdr,
 } from "./zdr-persistence";
 
+import { SUPPORT_EMAIL } from "../../../lib/branding";
 const PREVIEW_TEAM_ID = "3adefd26-77ec-5968-8dcf-c94b5630d1de";
 const POSTGRES_UNIQUE_VIOLATION = "23505";
 const LOOKUP_RACE_RETRY_MS = 250;
@@ -105,7 +106,7 @@ function validateAccess(
     return feedbackFailure(
       403,
       "TEAM_OPTED_OUT",
-      "Feedback is disabled for this team. Contact support@firecrawl.com to re-enable.",
+      `Feedback is disabled for this team. Contact ${SUPPORT_EMAIL} to re-enable.`,
     );
   }
 

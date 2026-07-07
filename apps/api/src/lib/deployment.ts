@@ -1,4 +1,5 @@
 import { config } from "../config";
+import { SUPPORT_EMAIL } from "./branding";
 export function isSelfHosted(): boolean {
   return config.USE_DB_AUTHENTICATION !== true;
 }
@@ -10,7 +11,7 @@ export function getErrorContactMessage(errorId?: string): string {
       : "An error occurred. Please check your logs for more details.";
   } else {
     return errorId
-      ? `An unexpected error occurred. Please contact help@firecrawl.com for help. Your exception ID is ${errorId}`
-      : "An unexpected error occurred. Please contact help@firecrawl.com for help.";
+      ? `An unexpected error occurred. Please contact ${SUPPORT_EMAIL} for help. Your exception ID is ${errorId}`
+      : `An unexpected error occurred. Please contact ${SUPPORT_EMAIL} for help.`;
   }
 }

@@ -9,6 +9,13 @@ export type PDFProcessorResult = {
    * and fall back to whatever upstream metadata pass set.
    */
   pagesProcessed?: number;
+  /**
+   * Structured, deterministic JSON produced by the external PDF service
+   * (opendataloader-pdf: elements with type, page, bounding box, heading
+   * level, table cells). Only populated by the pdf-service tier; threaded
+   * into EngineScrapeResult.json when present.
+   */
+  structuredJson?: unknown;
 };
 
 export type PdfMetadata = {

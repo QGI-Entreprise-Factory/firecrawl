@@ -34,6 +34,7 @@ import {
   formatTypesOf,
 } from "../../lib/key-restriction";
 
+import { SUPPORT_EMAIL } from "../../lib/branding";
 export async function searchController(
   req: RequestWithAuth<{}, SearchResponse, SearchRequest>,
   res: Response<SearchResponse>,
@@ -134,7 +135,7 @@ export async function searchController(
         return res.status(403).json({
           success: false,
           error:
-            "Zero Data Retention (ZDR) search is not enabled for your team. Contact support@firecrawl.com to enable this feature.",
+            `Zero Data Retention (ZDR) search is not enabled for your team. Contact ${SUPPORT_EMAIL} to enable this feature.`,
         });
       }
     }

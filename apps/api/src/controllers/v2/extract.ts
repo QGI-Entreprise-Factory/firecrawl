@@ -15,6 +15,7 @@ import { logRequest } from "../../services/logging/log_job";
 import { config } from "../../config";
 import { getScrapeZDR } from "../../lib/zdr-helpers";
 
+import { SUPPORT_EMAIL } from "../../lib/branding";
 /**
  * Extracts data from the provided URLs based on the request parameters.
  * Currently in beta.
@@ -33,7 +34,7 @@ export async function extractController(
     return res.status(400).json({
       success: false,
       error:
-        "Your team has zero data retention enabled. This is not supported on extract. Please contact support@firecrawl.com to unblock this feature.",
+        `Your team has zero data retention enabled. This is not supported on extract. Please contact ${SUPPORT_EMAIL} to unblock this feature.`,
     });
   }
 

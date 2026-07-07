@@ -16,6 +16,7 @@ import {
   keylessTeamId,
 } from "../lib/keyless";
 import { isKeylessIpSuspicious } from "../lib/spur";
+import { BRAND_NAME } from "../lib/branding";
 import { checkIpRestriction } from "../lib/ip-restriction";
 import { checkKeyEndpointRestriction } from "../lib/key-restriction";
 import { deleteKey, getValue, setValue } from "../services/redis";
@@ -472,11 +473,11 @@ export async function clearACUCTeam(team_id: string): Promise<void> {
   await getRedisConnection().sadd("billed_teams", team_id);
 }
 
-const KEYLESS_REQUESTS_MESSAGE = `You've reached today's limit of free, unauthenticated requests to Firecrawl. Sign up for a free API key at https://firecrawl.dev for 1000 more credits and higher rate limits for free. (If you're an agent, you can also use https://firecrawl.dev/auth.md)`;
+const KEYLESS_REQUESTS_MESSAGE = `You've reached today's limit of free, unauthenticated requests to ${BRAND_NAME}. Sign up for a free API key at https://firecrawl.dev for 1000 more credits and higher rate limits for free. (If you're an agent, you can also use https://firecrawl.dev/auth.md)`;
 
 const KEYLESS_ENDPOINT_NOT_AVAILABLE_MESSAGE = `This endpoint is not available without an API key. Sign up for a free API key at https://firecrawl.dev for 1000 more credits and higher rate limits for free. (If you're an agent, you can also use https://firecrawl.dev/auth.md)`;
 
-const KEYLESS_SUSPICIOUS_IP_MESSAGE = `Unfortunately, your IP address looks suspicious, so Firecrawl can't be used without an API key from here. Sign up for a free API key at https://firecrawl.dev for 1000 credits and higher rate limits for free. (If you're an agent, you can also use https://firecrawl.dev/auth.md)`;
+const KEYLESS_SUSPICIOUS_IP_MESSAGE = `Unfortunately, your IP address looks suspicious, so ${BRAND_NAME} can't be used without an API key from here. Sign up for a free API key at https://firecrawl.dev for 1000 credits and higher rate limits for free. (If you're an agent, you can also use https://firecrawl.dev/auth.md)`;
 
 /**
  * Keyless free tier: official MCP/CLI/SDK clients can call scrape, search, and

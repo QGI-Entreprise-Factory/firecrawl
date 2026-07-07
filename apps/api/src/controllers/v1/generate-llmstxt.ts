@@ -12,6 +12,7 @@ import { saveGeneratedLlmsTxt } from "../../lib/generate-llmstxt/generate-llmstx
 import { logRequest } from "../../services/logging/log_job";
 import { getScrapeZDR } from "../../lib/zdr-helpers";
 
+import { SUPPORT_EMAIL } from "../../lib/branding";
 type GenerateLLMsTextResponse =
   | ErrorResponse
   | {
@@ -33,7 +34,7 @@ export async function generateLLMsTextController(
     return res.status(400).json({
       success: false,
       error:
-        "Your team has zero data retention enabled. This is not supported on llmstxt. Please contact support@firecrawl.com to unblock this feature.",
+        `Your team has zero data retention enabled. This is not supported on llmstxt. Please contact ${SUPPORT_EMAIL} to unblock this feature.`,
     });
   }
 

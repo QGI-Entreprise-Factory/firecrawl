@@ -221,6 +221,14 @@ const configSchema = z.object({
   RUNPOD_MU_API_KEY: z.string().optional(),
   RUNPOD_MU_POD_ID: z.string().optional(),
 
+  // PDF service (structure-aware opendataloader-pdf HTTP wrapper)
+  PDF_SERVICE_URL: emptyStringAsUndefined(z.string()),
+  PDF_SERVICE_API_KEY: emptyStringAsUndefined(z.string()),
+
+  // Omni-convert service (markitdown HTTP wrapper for Office/images/audio/archives)
+  OMNI_CONVERT_SERVICE_URL: emptyStringAsUndefined(z.string()),
+  OMNI_CONVERT_SERVICE_API_KEY: emptyStringAsUndefined(z.string()),
+
   // PDF Rust Extraction (pdf-inspector)
   PDF_RUST_EXTRACT_ENABLE: z.stringbool().optional(),
   PDF_SHADOW_COMPARISON_ENABLE: z.stringbool().optional(),
@@ -351,4 +359,14 @@ const configSchema = z.object({
   CODE_SANDBOX_URL: z.string().default("ws://code-sandbox:3001"),
 });
 
-export const config = configSchema.parse(process.env);
+/* Env */
+// Rebrand transition (Qrawlex, formerly Firecrawl): QRAWLEX_* env vars are
+// read first; the legacy FIRECRAWL_* names are still honored as a fallback.
+const envWithDualRead: NodeJS.ProcessEnv = { ...process.env };
+for (const [key, value] of Object.entries(process.env)) {
+  if (key.startsWith("QRAWLEX_") && value !== undefined && value !== "") {
+    envWithDualRead["FIRECRAWL_" + key.slice("QRAWLEX_".length)] = value;
+  }
+}
+
+export const config = configSchema.parse(envWithDualRead);

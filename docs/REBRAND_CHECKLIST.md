@@ -1,7 +1,7 @@
 # Rebrand Checklist — firecrawl
 
-> Companion to `docs/AI_READY_PLATFORM_PLAN.md`. Target name is undecided —
-> `{{BRAND}}` below. Execute top-to-bottom; items are ordered so nothing
+> Companion to `docs/AI_READY_PLATFORM_PLAN.md`. Target name:
+> `Qrawlex` below. Execute top-to-bottom; items are ordered so nothing
 > user-facing breaks before its replacement exists.
 
 ## Occurrence inventory (case-insensitive "firecrawl")
@@ -36,14 +36,14 @@
 
 - [ ] Server: `FIRECRAWL_APP_HOST/PORT/SCHEME`, `FIRECRAWL_DASHBOARD_URL`,
       `FIRECRAWL_INDEX_WRITE_ONLY`, … (`apps/api/src/config.ts:26-30,
-      258-261`) — read `{{BRAND}}_*` first, fall back to `FIRECRAWL_*` with a
+      258-261`) — read `QRAWLEX_*` first, fall back to `FIRECRAWL_*` with a
       deprecation warning.
 - [ ] SDKs: `FIRECRAWL_API_KEY` / `FIRECRAWL_API_URL` (~208 refs) — same
       dual-read in each SDK client constructor.
 
 ## 3. Package publishes (needs name; do once, last)
 
-- [ ] npm: `@mendable/firecrawl-js` → `{{BRAND}}` scope
+- [ ] npm: `@mendable/firecrawl-js` → `Qrawlex` scope
       (`apps/js-sdk/firecrawl/package.json:2`); publish deprecation stub.
 - [ ] PyPI: `firecrawl-py` (`apps/python-sdk/pyproject.toml:7`).
 - [ ] Go: module path `github.com/firecrawl/firecrawl/apps/go-sdk` (`go.mod`)

@@ -5,6 +5,11 @@ import path from "path";
 import os from "os";
 import { writeFile } from "fs/promises";
 import { Meta } from "../..";
+import { config } from "../../../../config";
+import {
+  isOmniSupportedContentType,
+  omniExtensionForContentType,
+} from "../document/omniConvert";
 
 async function feResToFilePrefetch(
   logger: Logger,
@@ -62,6 +67,13 @@ async function feResToDocumentPrefetch(
     extension = "odt";
   } else if (contentType.includes("rtf")) {
     extension = "rtf";
+  } else {
+    // Types handled by the omni-convert service (PPTX, EPUB, MSG, IPYNB,
+    // images, audio, video, ZIP)
+    const omniExtension = omniExtensionForContentType(contentType);
+    if (omniExtension) {
+      extension = omniExtension;
+    }
   }
 
   return feResToFilePrefetch(logger, feRes, extension, "document", contentType);
@@ -154,6 +166,22 @@ export async function specialtyScrapeCheck(
       feRes?.content.startsWith("%PDF-"))
   ) {
     throw new AddFeatureError(["pdf"], await feResToPdfPrefetch(logger, feRes));
+  }
+
+  // When the omni-convert service is configured, route content types it
+  // supports (image/*, audio/*, video/*, application/zip, PPTX, EPUB, MSG,
+  // IPYNB) to the document engine instead of rejecting them, reusing the
+  // document prefetch mechanism. When it is not configured, behavior below
+  // stays exactly as before.
+  if (
+    config.OMNI_CONVERT_SERVICE_URL &&
+    isOmniSupportedContentType(contentType)
+  ) {
+    throw new AddFeatureError(
+      ["document"],
+      undefined,
+      await feResToDocumentPrefetch(logger, feRes, contentType),
+    );
   }
 
   // Reject unsupported binary content types (images, video, audio, archives, etc.)

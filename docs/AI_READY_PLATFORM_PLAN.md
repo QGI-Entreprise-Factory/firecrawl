@@ -209,16 +209,16 @@ This maps onto firecrawl's existing `Document` (markdown + metadata +
 
 ## 5. Rebrand strategy
 
-No target name is chosen yet, so all preparation is **name-agnostic**: the
+The target name is **Qrawlex**: the
 per-repo `REBRAND_CHECKLIST.md` files inventory every touchpoint; execution is
-find-replace + republish once `{{BRAND}}` is decided.
+find-replace + republish once `Qrawlex` is decided.
 
 ### 5.1 Principles
 
 - **Public names last, internals first.** Registry publishes
   (npm/PyPI/Maven/gems/NuGet) are irreversible name-squats — do them once, at
   the end, with deprecation stubs pointing from the old names.
-- **Dual-read env vars** during transition: new `{{BRAND}}_*` var read first,
+- **Dual-read env vars** during transition: new `QRAWLEX_*` var read first,
   legacy `FIRECRAWL_*` honored with a deprecation warning for ≥1 release.
 - **Wrap forks, don't rename them.** markitdown tracks
   `microsoft/markitdown`; renaming its import path/entry-point group
@@ -261,7 +261,7 @@ find-replace + republish once `{{BRAND}}` is decided.
 - **Phase 2 — PDF service**: HTTP wrapper + Dockerfile for opendataloader-pdf
   (resident JVM); tier in firecrawl's PDF waterfall; `deterministicJson`
   carries bounding-box JSON; optional hybrid/Docling sidecar for OCR.
-- **Phase 3 — Rebrand execution** (needs the chosen name): run the three
+- **Phase 3 — Rebrand execution** (name: Qrawlex): run the three
   checklists — strings module, dual-read env vars, registry publishes with
   deprecation stubs, domains/redirects, docker retags.
 - **Phase 4 — Platform polish**: unified docker-compose profile, one docs
@@ -282,5 +282,5 @@ find-replace + republish once `{{BRAND}}` is decided.
 4. **Media cost controls** — image captioning and audio transcription call
    LLM/speech APIs; needs per-team-flag gating and `*_PERCENT` style rollout
    like Fire PDF.
-5. **Name** — `{{BRAND}}` is undecided; Phase 3 is fully blocked on it, but
-   Phases 1–2 are not.
+5. **Name** — decided: **Qrawlex**. Phase 3 is unblocked.
+

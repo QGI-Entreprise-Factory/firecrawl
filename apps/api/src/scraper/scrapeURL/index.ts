@@ -88,6 +88,10 @@ import path from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import type { DataLayerScrapeMetadata } from "../../lib/data-layer";
+import {
+  isOmniSupportedContentType,
+  OMNI_DOCUMENT_URL_EXTENSIONS,
+} from "./engines/document/omniConvert";
 
 export type ScrapeUrlResponse =
   | {
@@ -240,7 +244,15 @@ function buildFeatureFlags(
     lowerPath.includes(".xlsx/") ||
     lowerPath.includes(".xls/");
 
-  if (isDocument) {
+  // Types the omni-convert service handles route through the document engine
+  // (only when the service is configured; otherwise behavior is unchanged)
+  const isOmniDocument =
+    !!config.OMNI_CONVERT_SERVICE_URL &&
+    OMNI_DOCUMENT_URL_EXTENSIONS.some(
+      ext => lowerPath.endsWith(ext) || lowerPath.includes(ext + "/"),
+    );
+
+  if (isDocument || isOmniDocument) {
     flags.add("document");
   } else if (lowerPath.endsWith(".pdf") || lowerPath.includes(".pdf/")) {
     // Only add PDF flag if it's not a document
@@ -311,6 +323,14 @@ function isDocumentUpload(filename: string, contentType?: string): boolean {
     normalizedType.includes("application/vnd.oasis.opendocument.text") ||
     normalizedType.includes("application/rtf") ||
     normalizedType.includes("text/rtf")
+  );
+}
+
+function isOmniUpload(filename: string, contentType?: string): boolean {
+  const ext = path.extname(filename).toLowerCase();
+  return (
+    OMNI_DOCUMENT_URL_EXTENSIONS.includes(ext) ||
+    (!!contentType && isOmniSupportedContentType(contentType))
   );
 }
 
@@ -411,6 +431,20 @@ async function buildMetaObject(
         bodyBuffer: buffer,
         proxyUsed: "basic",
         contentType: contentType || "text/html; charset=utf-8",
+      };
+    } else if (
+      config.OMNI_CONVERT_SERVICE_URL &&
+      isOmniUpload(filename, contentType)
+    ) {
+      // Files the omni-convert service handles (PPTX, EPUB, MSG, IPYNB,
+      // images, audio, video, ZIP) go through the document engine.
+      const filePath = await writeUploadedFileToTemp(filename, buffer, ".bin");
+      documentPrefetch = {
+        filePath,
+        status: 200,
+        url: prefetchUrl,
+        proxyUsed: "basic",
+        contentType: contentType || "application/octet-stream",
       };
     } else {
       throw new UnsupportedFileError(

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { config } from "./config";
+import { BRAND_NAME } from "./lib/branding";
 import "./services/sentry";
 import { setSentryServiceTag } from "./services/sentry";
 import * as Sentry from "@sentry/node";
@@ -110,7 +111,7 @@ if (config.BULL_AUTH_KEY) {
 
 app.get("/", (_, res) => {
   res.json({
-    message: "Firecrawl API",
+    message: `${BRAND_NAME} API`,
     documentation_url: "https://docs.firecrawl.dev",
   });
 });
