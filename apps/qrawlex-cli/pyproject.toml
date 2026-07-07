@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qrawlex"
+version = "0.1.0"
+description = "Unified CLI for the Qrawlex AI-ready content platform: scrape, crawl, map, and convert any file to AI-ready markdown."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "AGPL-3.0-only" }
+authors = [{ name = "Qrawlex" }]
+keywords = ["scraping", "crawling", "markdown", "pdf", "ai", "rag"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+dependencies = ["requests>=2.25.0"]
+
+[project.optional-dependencies]
+# Fully-local conversion with no services required.
+local = ["markitdown[all]>=0.1.1", "opendataloader-pdf"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+qrawlex = "qrawlex_cli.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/firecrawl/firecrawl"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qrawlex_cli"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
