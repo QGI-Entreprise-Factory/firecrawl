@@ -1,0 +1,22 @@
+[package]
+name = "qrawlex-desktop"
+version = "0.1.0"
+description = "Qrawlex Desktop — local UI that manages the Qrawlex Docker stack for file conversion and website crawling"
+authors = ["Qrawlex"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", features = ["json", "multipart"] }
+tokio = { version = "1", features = ["process", "fs"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true
